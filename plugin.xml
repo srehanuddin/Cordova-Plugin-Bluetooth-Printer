@@ -2,7 +2,7 @@
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android"
         id="cordova-plugin-bluetooth-printer"
-        version="0.0.1-dev">
+        version="0.0.2-dev">
 
    <name>BluetoothPrinter</name>
    <description>A cordova plugin for bluetooth printer for android platform, which support text printing and POS printing.</description>

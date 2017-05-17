@@ -106,6 +106,16 @@ public class BluetoothPrinter extends CordovaPlugin {
 			}
 			return true;
 		}
+		else if (action.equals("printQRCode")) {
+        			try {
+        				String msg = args.getString(0);
+                        printQRCode(callbackContext, msg);
+        			} catch (IOException e) {
+        				Log.e(LOG_TAG, e.getMessage());
+        				e.printStackTrace();
+        			}
+        			return true;
+        		}
 		return false;
 	}
 
@@ -336,6 +346,55 @@ public class BluetoothPrinter extends CordovaPlugin {
         return false;
     }
 
+    boolean printQRCode(CallbackContext callbackContext, String str) throws IOException {
+            try {
+            	int nVersion = 0;
+            	int nErrorCorrectionLevel = 3;
+            	int nMagnification = 8;
+
+                 byte[] bCodeData = null;
+                 try
+                 {
+               	  bCodeData = str.getBytes("UTF-8");
+
+                 }
+                 catch (UnsupportedEncodingException e)
+                 {
+                 	String errMsg = e.getMessage();
+					Log.e(LOG_TAG, errMsg);
+				   	e.printStackTrace();
+				   	callbackContext.error(errMsg);
+                 }
+
+                 byte[] command = new byte[bCodeData.length + 7];
+
+                 command[0] = (byte) 27;
+                 command[1] = (byte) 90;
+                 command[2] = ((byte)nVersion);
+                 command[3] = ((byte)nErrorCorrectionLevel);
+                 command[4] = ((byte)nMagnification);
+                 command[5] = (byte)(bCodeData.length & 0xff);
+                 command[6] = (byte)((bCodeData.length & 0xff00) >> 8);
+                 System.arraycopy(bCodeData, 0, command, 7, bCodeData.length);
+
+                //mmOutputStream.write(("Inam").getBytes());
+                //mmOutputStream.write((((char)0x0A) + "10 Rehan").getBytes());
+                mmOutputStream.write(command);
+                //mmOutputStream.write(0x0A);
+
+                // tell the user data were sent
+    			Log.d(LOG_TAG, "Data Sent");
+                callbackContext.success(command);
+                return true;
+            } catch (Exception e) {
+                String errMsg = e.getMessage();
+                Log.e(LOG_TAG, errMsg);
+                e.printStackTrace();
+                callbackContext.error(errMsg);
+            }
+            return false;
+        }
+
 	// disconnect bluetooth printer.
 	boolean disconnectBT(CallbackContext callbackContext) throws IOException {
 		try {
@@ -359,7 +418,7 @@ public class BluetoothPrinter extends CordovaPlugin {
         // TODO Auto-generated method stubbyte[] send;
         byte[] send=null;
         try {
-            send = textStr.getBytes("GBK");
+            send = textStr.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             send = textStr.getBytes();
         }

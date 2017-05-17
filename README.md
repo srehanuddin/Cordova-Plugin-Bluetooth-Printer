@@ -6,6 +6,11 @@ A cordova plugin for bluetooth printer for android platform, which support text 
 - POS Commands
 - Image Printing (todo)
 - Barcode Printing (todo)
+- QRCode Printing (on work)
+
+
+##Tested with:
+58mm POS-5802LD
 
 ##Install
 Using the Cordova CLI and NPM, run:
@@ -85,7 +90,7 @@ BTPrinter.printText(function(data){
 Print image
 
 ```
-BTPrinter.printText(function(data){
+BTPrinter.printImage(function(data){
     console.log("Success");
     console.log(data)
 },function(err){
@@ -93,17 +98,6 @@ BTPrinter.printText(function(data){
     console.log(err)
 }, "Image Base64 String")
 ```
-
-```
-BTPrinter.print(function(data){
-    console.log("Success");
-    console.log(data)
-},function(err){
-    console.log("Error");
-    console.log(err)
-}, "Base64 String of Image")
-```
-
 
 POS printing
 
@@ -117,3 +111,14 @@ BTPrinter.printPOSCommand(function(data){
 }, "0C")
 //OC is a POS command for page feed
 ```
+
+QRCode printing
+
+```
+BTPrinter.printQRCode(function(data){
+    console.log("Success");
+    console.log(data)
+},function(err){
+    console.log("Error");
+    console.log(err)
+}, qrData)
