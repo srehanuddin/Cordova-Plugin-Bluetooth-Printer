@@ -1,0 +1,38 @@
+{
+  "name": "Cordova-Plugin-Bluetooth-Printer",
+  "version": "0.0.1-dev",
+  "description": "A cordova plugin for bluetooth printer for android platform, which support text printing and POS printing.",
+  "cordova": {
+    "id": "cordova-plugin-bluetooth-printer",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srehanuddin/Cordova-Plugin-Bluetooth-Printer.git"
+  },
+  "keywords": [
+    "cordova",
+    "bluetooth",
+    "printer",
+    "pos",
+    "text",
+    "barcode",
+    "image",
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "author": "Syed Rehanuddin",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/srehanuddin/Cordova-Plugin-Bluetooth-Printer/issues"
+  },
+  "homepage": "https://github.com/srehanuddin/Cordova-Plugin-Bluetooth-Printer#readme"
+}
