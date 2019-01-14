@@ -87,6 +87,15 @@ public class BluetoothPrinter extends CordovaPlugin {
                 e.printStackTrace();
             }
             return true;
+        } else if (action.equals("printBase64")) {
+            try {
+                String msg = args.getString(0);
+                printBase64(callbackContext, msg);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, e.getMessage());
+                e.printStackTrace();
+            }
+            return true;
         } else if (action.equals("printText")) {
             try {
                 String msg = args.getString(0);
@@ -321,6 +330,115 @@ public class BluetoothPrinter extends CordovaPlugin {
         return false;
     }
 
+    //NEW BASE64 IMAGE
+    boolean printBase64(CallbackContext callbackContext, String msg) throws IOException {
+        try {
+
+            final String encodedString = msg;
+            final String pureBase64Encoded = encodedString.substring(encodedString.indexOf(",") + 1);
+            final byte[] decodedBytes = Base64.decode(pureBase64Encoded, Base64.DEFAULT);
+
+            Bitmap decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+
+            bitmap = decodedBitmap;
+            int mWidth = bitmap.getWidth();
+            int mHeight = bitmap.getHeight();
+
+            bitmap = resizeImage(bitmap, 48 * 8, mHeight);
+
+            byte[] bt = decodeBitmapBase64(bitmap);
+
+            mmOutputStream.write(bt);
+            // tell the user data were sent
+            Log.d(LOG_TAG, "PRINT BASE64 SEND");
+            callbackContext.success("PRINT BASE64 SEND");
+            return true;
+
+        } catch (Exception e) {
+            String errMsg = e.getMessage();
+            Log.e(LOG_TAG, errMsg);
+            e.printStackTrace();
+            callbackContext.error(errMsg);
+        }
+        return false;
+    }
+    //NEW DECODE IMAGE BASE64
+    public static byte[] decodeBitmapBase64(Bitmap bmp) {
+        int bmpWidth = bmp.getWidth();
+        int bmpHeight = bmp.getHeight();
+        List<String> list = new ArrayList<String>(); //binaryString list
+        StringBuffer sb;
+        int bitLen = bmpWidth / 8;
+        int zeroCount = bmpWidth % 8;
+        String zeroStr = "";
+        if (zeroCount > 0) {
+            bitLen = bmpWidth / 8 + 1;
+            for (int i = 0; i < (8 - zeroCount); i++) {
+                zeroStr = zeroStr + "0";
+            }
+        }
+
+        for (int i = 0; i < bmpHeight; i++) {
+            sb = new StringBuffer();
+            for (int j = 0; j < bmpWidth; j++) {
+                int color = bmp.getPixel(j, i);
+
+                int r = (color >> 16) & 0xff;
+                int g = (color >> 8) & 0xff;
+                int b = color & 0xff;
+                // if color close to white，bit='0', else bit='1'
+                if (r > 160 && g > 160 && b > 160) {
+                    sb.append("0");
+                } else {
+                    sb.append("1");
+                }
+            }
+            if (zeroCount > 0) {
+                sb.append(zeroStr);
+            }
+            list.add(sb.toString());
+        }
+
+        List<String> bmpHexList = binaryListToHexStringList(list);
+        String commandHexString = "1D763000";
+
+        //construct xL and xH
+        //there are 8 pixels per byte. In case of modulo: add 1 to compensate.
+        bmpWidth = bmpWidth % 8 == 0 ? bmpWidth / 8 : (bmpWidth / 8 + 1);
+        int xL = bmpWidth % 256;
+        int xH = (bmpWidth - xL) / 256;
+
+        String xLHex = Integer.toHexString(xL);
+        String xHHex = Integer.toHexString(xH);
+        if (xLHex.length() == 1) {
+            xLHex = "0" + xLHex;
+        }
+        if (xHHex.length() == 1) {
+            xHHex = "0" + xHHex;
+        }
+        String widthHexString = xLHex + xHHex;
+
+        //construct yL and yH
+        int yL = bmpHeight % 256;
+        int yH = (bmpHeight - yL) / 256;
+
+        String yLHex = Integer.toHexString(yL);
+        String yHHex = Integer.toHexString(yH);
+        if (yLHex.length() == 1) {
+            yLHex = "0" + yLHex;
+        }
+        if (yHHex.length() == 1) {
+            yHHex = "0" + yHHex;
+        }
+        String heightHexString = yLHex + yHHex;
+
+        List<String> commandList = new ArrayList<String>();
+        commandList.add(commandHexString + widthHexString + heightHexString);
+        commandList.addAll(bmpHexList);
+
+        return hexList2Byte(commandList);
+    }
+    
     // disconnect bluetooth printer.
     boolean disconnectBT(CallbackContext callbackContext) throws IOException {
         try {
